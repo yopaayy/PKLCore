@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\DudiController;
+use App\Http\Controllers\API\SiswaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\AuthController;
 
 
 
@@ -20,6 +22,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+
+    // CRUD Master Data
+    Route::apiResource('dudis', DudiController::class);
+    Route::apiResource('siswas', SiswaController::class);
 
     // --- Rute di bawah ini akan dijaga oleh Middleware Gatekeeper ---
     // User WAJIB melengkapi profile (WA, Alamat, Foto) untuk bisa mengaksesnya
