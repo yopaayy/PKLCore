@@ -17,6 +17,18 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+
+            // Penambahan Field Kelengkapan Profil
+            $table->string('whatsapp_number')->nullable();
+            $table->text('address')->nullable();
+            $table->string('photo_path')->nullable(); // Untuk menyimpan path upload foto
+
+            // Role Management (superadmin, admin, guru, siswa, dudi)
+            $table->string('role')->default('siswa');
+
+            // Status Kelengkapan Profil (Boolean untuk mempercepat pengecekan)
+            $table->boolean('is_profile_completed')->default(false);
+
             $table->rememberToken();
             $table->timestamps();
         });
