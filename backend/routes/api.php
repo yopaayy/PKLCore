@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\DudiController;
+use App\Http\Controllers\API\PembayaranController;
 use App\Http\Controllers\API\SiswaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -35,5 +36,8 @@ Route::middleware('auth:sanctum')->group(function () {
         // Route::post('/pembayaran', [PaymentController::class, 'process']);
         // Route::post('/pengajuan-pkl', [PengajuanController::class, 'store']);
 
+        // Rute Pembayaran / Administrasi
+        Route::post('/pembayaran', [PembayaranController::class, 'store']);
+        Route::get('/pembayaran', [PembayaranController::class, 'index']);
     });
 });
