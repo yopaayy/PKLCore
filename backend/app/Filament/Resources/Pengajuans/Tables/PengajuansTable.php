@@ -47,6 +47,16 @@ class PengajuansTable
             ->actions([
                 EditAction::make()
                     ->label('Review'),
+
+                // Tambahan Tombol Cetak PDF
+                Action::make('cetak_surat')
+                    ->label('Cetak Surat')
+                    ->icon('heroicon-o-printer')
+                    ->color('success')
+                    ->url(fn(\App\Models\Pengajuan $record) => route('cetak.surat.pengantar', $record->id))
+                    ->openUrlInNewTab() // Buka PDF di tab baru
+                    // Tombol ini HANYA muncul jika statusnya Approved
+                    ->visible(fn(\App\Models\Pengajuan $record) => $record->status === 'Approved'),
             ]);
     }
 }
