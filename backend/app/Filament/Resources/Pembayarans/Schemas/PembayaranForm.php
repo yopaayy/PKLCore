@@ -2,10 +2,12 @@
 
 namespace App\Filament\Resources\Pembayarans\Schemas;
 
-use Filament\Forms\Components\Section;
+
+use Filament\Forms\Components\FileUpload;
+use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\FileUpload;
+use App\Models\User;
 use Filament\Schemas\Schema;
 
 class PembayaranForm
@@ -15,37 +17,51 @@ class PembayaranForm
         return $schema
             ->components([
                 Section::make('Informasi Pembayar')
+                    ->description('Pilih siswa untuk memproses verifikasi pembayaran.')
                     ->schema([
                         Select::make('user_id')
-                            ->relationship('user', 'name')
-                            ->disabled() // Admin tidak boleh sembarang ubah pembayar
-                            ->label('Nama Siswa'),
+                            ->label('Nama Siswa')
+                            // Mengambil user yang rolenya 'siswa' saja
+                            ->options(User::where('role', 'siswa')->pluck('name', 'id'))
+                            ->searchable()
+                            ->required()
+                            ->live() // Agar perubahan memicu update pada field lain (WhatsApp)
+                            ->disabledOn('edit') // Dikunci hanya saat EDIT, agar saat CREATE bisa dipilih
+                            ->afterStateUpdated(function ($state, $set) {
+                                // Otomatis tarik nomor WhatsApp saat siswa dipilih
+                                $user = User::find($state);
+                                if ($user) {
+                                    $set('nomor_whatsapp_pembayar', $user->whatsapp_number);
+                                }
+                            }),
+
                         TextInput::make('nomor_whatsapp_pembayar')
-                            ->label('WhatsApp (Auto-extracted)')
-                            ->disabled(),
+                            ->label('WhatsApp (Profil)')
+                            ->placeholder('Akan terisi otomatis...')
+                            ->helperText(fn($state) => empty($state) ? '⚠️ Siswa ini belum melengkapi nomor WhatsApp di profil!' : 'Data WhatsApp tersedia.')
+                            ->disabled()
+                            ->dehydrated(), // Tetap simpan ke DB meskipun di-disable di UI
+
                         TextInput::make('jumlah_bayar')
-                            ->prefix('IDR')
+                            ->label('Jumlah Bayar')
                             ->numeric()
-                            ->required(),
-                        Select::make('status')
+                            ->prefix('Rp')
+                            ->required()
+                            ->placeholder('Contoh: 500000'),
+                    ])->columns(3),
+
+                Section::make('Tindakan Verifikasi Admin')
+                    ->schema([
+                       Select::make('status')
                             ->options([
                                 'Pending' => 'Pending',
-                                'Lunas' => 'Lunas',
-                                'Ditolak' => 'Ditolak',
+                                'Approved' => 'Approved',
+                                'Rejected' => 'Rejected',
                             ])
                             ->required()
-                            ->native(false),
-                    ])->columns(2),
-
-                Section::make('Bukti Transaksi')
-                    ->schema([
-                        FileUpload::make('bukti_transfer_path')
-                            ->label('Struk Bukti Transfer')
-                            ->image()
-                            ->directory('bukti_pembayaran')
-                            ->openable() // Bisa diklik untuk diperbesar
-                            ->downloadable()
-                            ->columnSpanFull(),
+                            ->native(false)
+                            ->default('Pending')
+                            ->label('Keputusan (Status)'),
                     ]),
             ]);
     }

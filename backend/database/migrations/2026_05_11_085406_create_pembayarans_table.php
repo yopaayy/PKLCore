@@ -20,7 +20,7 @@ return new class extends Migration
 
             $table->decimal('jumlah_bayar', 10, 2);
             $table->string('metode_pembayaran')->nullable(); // misal: Transfer Bank, e-Wallet
-            $table->enum('status', ['Pending', 'Lunas', 'Ditolak'])->default('Pending');
+            $table->enum('status', ['Pending', 'Approved', 'Rejected'])->default('Pending');
             $table->string('bukti_transfer_path')->nullable(); // Untuk upload struk
             $table->timestamps();
         });

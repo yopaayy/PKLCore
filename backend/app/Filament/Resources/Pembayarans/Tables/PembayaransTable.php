@@ -2,12 +2,16 @@
 
 namespace App\Filament\Resources\Pembayarans\Tables;
 
+
+
+
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+// --- PASTIKAN MENGGUNAKAN NAMESPACE ACTION V5 ---
+use Filament\Actions\EditAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class PembayaransTable
@@ -17,43 +21,51 @@ class PembayaransTable
         return $table
             ->columns([
                 TextColumn::make('user.name')
-                    ->label('Siswa')
+                    ->label('Nama Siswa')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold'),
+
                 TextColumn::make('nomor_whatsapp_pembayar')
                     ->label('WhatsApp')
-                    ->copyable() // Admin bisa langsung copy nomor WA
-                    ->searchable(),
+                    ->searchable()
+                    ->copyable(),
+
                 TextColumn::make('jumlah_bayar')
-                    ->money('IDR')
+                    ->label('Jumlah')
+                    ->money('IDR') // Langsung format ke Rupiah otomatis
                     ->sortable(),
+
                 TextColumn::make('status')
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
-                        'Lunas' => 'success',
+                        'Approved' => 'success', // Ubah dari Verified menjadi Approved
                         'Pending' => 'warning',
-                        'Ditolak' => 'danger',
+                        'Rejected' => 'danger',
+                        default => 'gray',
                     }),
-                ImageColumn::make('bukti_transfer_path')
-                    ->label('Bukti')
-                    ->circular(),
+
                 TextColumn::make('created_at')
-                    ->label('Tanggal Bayar')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->label('Tanggal')
+                    ->dateTime('d M Y, H:i')
+                    ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('status')
                     ->options([
                         'Pending' => 'Pending',
-                        'Lunas' => 'Lunas',
-                        'Ditolak' => 'Ditolak',
+                        'Approved' => 'Approved', // Ubah dari Verified menjadi Approved
+                        'Rejected' => 'Rejected',
                     ]),
             ])
             ->actions([
                 EditAction::make()
-                    ->label('Verifikasi'), // Mengubah tombol edit jadi 'Verifikasi'
+                    ->label('Review'),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 }

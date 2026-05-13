@@ -50,4 +50,14 @@ class User extends Authenticatable
             'is_profile_completed' => 'boolean',
         ];
     }
+
+    public function guru()
+    {
+        return $this->hasOne(Guru::class);
+    }
+
+    public function dudi()
+    {
+        return $this->hasOne(Dudi::class);
+    }
 }
